@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import net.brubio.model.Solicitud;
+import net.brubio.model.Usuario;
 import net.brubio.repository.SolicitudesRepository;
 import net.brubio.service.ISolicitudesService;
 
@@ -44,6 +45,11 @@ public class SolicitudesServiceJpa implements ISolicitudesService{
 	@Override
 	public Page<Solicitud> buscarTodas(Pageable ppage) {
 		return solicitudesRepo.findAll(ppage);
+	}
+
+	@Override
+	public Page<Solicitud> buscarPorUsuario(Usuario user, Pageable page) {
+		return solicitudesRepo.findByUsuario(user, page);
 	}
 
 }

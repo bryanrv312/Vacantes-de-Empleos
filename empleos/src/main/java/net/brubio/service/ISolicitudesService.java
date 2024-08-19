@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import net.brubio.model.Solicitud;
+import net.brubio.model.Usuario;
 
 public interface ISolicitudesService {
 	
@@ -19,6 +20,6 @@ public interface ISolicitudesService {
 	
 	Page<Solicitud> buscarTodas(Pageable ppage);
 	
-	
+	Page<Solicitud> buscarPorUsuario(Usuario user, Pageable page);
 
 }

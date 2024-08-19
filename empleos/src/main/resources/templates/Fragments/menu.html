@@ -29,6 +29,9 @@
 				<a class="nav-link" th:href="@{/solicitudes/indexPaginate}">Solicitudes</a>
 			</li>
 			<!--  <li class="nav-item"><a class="nav-link" th:href="@{/solicitudes/index}">Solicitudes</a></li>-->
+			<li class="nav-item" sec:authorize="hasAnyAuthority('USUARIO')">
+				<a class="nav-link" th:href="@{/solicitudes/indexPaginate_usuario}">Mis Solicitudes</a>
+			</li>
 		</ul>
 		<div sec:authorize="isAnonymous()"> 
 			<a class="btn btn-primary" th:href="@{/index}">Ingresar</a>&nbsp;

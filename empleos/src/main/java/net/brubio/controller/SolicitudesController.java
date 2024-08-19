@@ -1,5 +1,7 @@
 package net.brubio.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 
+import net.brubio.model.Perfil;
 import net.brubio.model.Solicitud;
 import net.brubio.model.Usuario;
 import net.brubio.model.Vacante;
@@ -51,6 +54,35 @@ public class SolicitudesController {
 	@GetMapping("/indexPaginate")
 	public String mostrarIndexPaginado(Pageable pageable, Model model) {
 		Page<Solicitud> lista = serviceSolicitudes.buscarTodas(pageable);
+		model.addAttribute("listaSolicitudes", lista);
+		return "solicitudes/listSolicitudes";
+	}
+	
+	@GetMapping("/indexPaginate_usuario") 
+	public String mostrarIndexPaginado(Pageable pageable, Model model, Principal principal) {
+		System.out.println("hola");
+		String username = principal.getName();
+		Usuario user = serviceUsuarios.buscarPorUsername(username);
+		System.err.println(user);
+		
+		Page<Solicitud> lista = serviceSolicitudes.buscarPorUsuario(user, pageable);
+		
+		/*for (Perfil perfil : user.getPerfiles()) {
+            System.err.println("Perfil ID: " + perfil.getId() + ", Perfil: " + perfil.getPerfil());
+            
+            if(perfil.getPerfil().equals("USUARIO")) {
+            	lista = serviceSolicitudes.buscarPorUsuario(user, pageable);
+            }
+            if(perfil.getPerfil().equals("ADMINISTRADOR")) {
+            	lista = serviceSolicitudes.buscarTodas(pageable);
+            }
+            if(perfil.getPerfil().equals("SUPERVISOR") && perfil.getPerfil().equals("ADMINISTRADOR")) {
+            	lista = serviceSolicitudes.buscarTodas(pageable);
+            }
+        } */
+		
+		//filtrar las solicitdes segun el rol
+		//Page<Solicitud> lista= serviceSolicitudes.buscarTodas(pageable);
 		model.addAttribute("listaSolicitudes", lista);
 		return "solicitudes/listSolicitudes";
 	}
@@ -113,7 +145,7 @@ public class SolicitudesController {
 		
 		message.setTo(solicitud.getUsuario().getEmail());
 		message.setSubject("Recepcion de CV");
-		message.setText("PaPularrix buendia aureliano aceptaste acudite terminaste");
+		message.setText("La solucitud se envio satisfactoriamente");
 		
 		try {
 			javaMailSender.send(message);
