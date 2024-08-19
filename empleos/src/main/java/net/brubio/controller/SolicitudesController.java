@@ -59,13 +59,19 @@ public class SolicitudesController {
 	}
 	
 	@GetMapping("/indexPaginate_usuario") 
-	public String mostrarIndexPaginado(Pageable pageable, Model model, Principal principal) {
-		System.out.println("hola");
+	public String mostrarIndexPaginado(Pageable pageable, Model model, Principal principal, RedirectAttributes attributes) {
 		String username = principal.getName();
 		Usuario user = serviceUsuarios.buscarPorUsername(username);
 		System.err.println(user);
 		
 		Page<Solicitud> lista = serviceSolicitudes.buscarPorUsuario(user, pageable);
+		
+		if(lista.isEmpty()) {
+			System.err.println("no hay naki");
+			model.addAttribute("msg_null", "No hay solicitudes registradas para este usuario");
+		}else {
+			model.addAttribute("listaSolicitudes", lista);
+		}
 		
 		/*for (Perfil perfil : user.getPerfiles()) {
             System.err.println("Perfil ID: " + perfil.getId() + ", Perfil: " + perfil.getPerfil());
@@ -83,7 +89,7 @@ public class SolicitudesController {
 		
 		//filtrar las solicitdes segun el rol
 		//Page<Solicitud> lista= serviceSolicitudes.buscarTodas(pageable);
-		model.addAttribute("listaSolicitudes", lista);
+		//model.addAttribute("listaSolicitudes", lista);
 		return "solicitudes/listSolicitudes";
 	}
 	
