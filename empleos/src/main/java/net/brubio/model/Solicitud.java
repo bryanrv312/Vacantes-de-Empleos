@@ -30,6 +30,8 @@ public class Solicitud {
 	@OneToOne
 	@JoinColumn(name = "idUsuario") //fk en la tabla usuarios
 	private Usuario usuario;
+	
+	private Boolean vista = false;
 
 	
 	public Solicitud() {
@@ -85,11 +87,24 @@ public class Solicitud {
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
 	}
+	
+	
 
+	public Boolean getVista() {
+		return vista;
+	}
+
+	public void setVista(Boolean vista) {
+		this.vista = vista;
+	}
+
+	
 	@Override
 	public String toString() {
 		return "Solicitud [id=" + id + ", fecha=" + fecha + ", comentarios=" + comentarios + ", archivo=" + archivo
-				+ ", vacante=" + vacante + ", usuario=" + usuario + "]";
+				+ ", vacante=" + vacante + ", usuario=" + usuario + ", vista=" + vista + "]";
 	}
+
+	
 	
 }
