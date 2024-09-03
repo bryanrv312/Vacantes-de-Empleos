@@ -67,7 +67,7 @@ public class SolicitudesController {
 		Page<Solicitud> lista = serviceSolicitudes.buscarPorUsuario(user, pageable);
 		
 		if(lista.isEmpty()) {
-			System.err.println("no hay naki");
+			System.err.println("lista de solicitudes vacia !");
 			model.addAttribute("msg_null", "No hay solicitudes registradas para este usuario");
 		}else {
 			model.addAttribute("listaSolicitudes", lista);
