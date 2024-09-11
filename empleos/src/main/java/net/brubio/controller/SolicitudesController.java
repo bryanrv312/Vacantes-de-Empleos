@@ -236,7 +236,7 @@ public class SolicitudesController {
 		}
 		
 		// Prepara el archivo para la descarga
-        File file = new File("c:/empleos/files-cv/" + archivo); // Ajusta la ruta según tu configuración
+        File file = new File("c:/empleos/files-cv/" + archivo); // ruta
         if (file.exists()) {
             // Configura la respuesta HTTP para la descarga
             response.setContentType("application/octet-stream");
@@ -251,41 +251,34 @@ public class SolicitudesController {
                     outputStream.write(buffer, 0, bytesRead);
                 }
                 outputStream.flush();
-            }
-
-            // Solo después de completar el streaming, marca la solicitud como vista y envía el correo
-            solicitud.setVista(true);
-            serviceSolicitudes.guardar(solicitud); // Guardar cambios en la base de datos
-            System.out.println(solicitud.getVista() + " La solicitud ha sido marcada como vista.");
-
-            
-        } else {
-            // Manejo de error si el archivo no existe
+            }// Se completo el streaming
+        } else {// Manejo de error si el archivo no existe
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "El archivo no fue encontrado.");
         }
 		
 		System.err.println(solicitud.getVista());
 		
 		if (esAdministrador) {
-
             //verificar si el campo vista es false para mandar correo de cv visto
             if (!solicitud.getVista()) {
             	// Enviar el correo
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(solicitud.getUsuario().getEmail());
                 message.setSubject("Tu CV fue visto");
-                message.setText("Tu CV fue visualizado por uno de los administradores");
+                message.setText("Tu CV fue visualizado por uno de los administradores para el puesto de " + solicitud.getVacante().getNombre());
                 javaMailSender.send(message);
                 System.err.println("Se envió el correo a " + solicitud.getUsuario().getEmail());
+                
+                solicitud.setVista(true);
+                serviceSolicitudes.guardar(solicitud); // Guardar cambios en la base de datos
+                System.out.println(solicitud.getVista() + " **  La solicitud ha sido marcada como vista.");
             } else {
                 System.out.println("El correo ya fue enviado anteriormente.");
             }
         } else {
             System.out.println("NO es ADMINISTRADOR.");
         }
-    
-		
-		//return "redirect:/solicitudes/indexPaginate";
+
 	}
 	
 		
