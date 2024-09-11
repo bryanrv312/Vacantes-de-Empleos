@@ -278,6 +278,7 @@ public class SolicitudesController {
         } else {
             System.out.println("NO es ADMINISTRADOR.");
             //hola
+            //hola 2
         }
 
 	}
