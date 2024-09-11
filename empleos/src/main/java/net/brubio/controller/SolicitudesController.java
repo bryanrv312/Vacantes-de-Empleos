@@ -1,6 +1,14 @@
 package net.brubio.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Principal;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 
+import jakarta.servlet.http.HttpServletResponse;
 import net.brubio.model.Perfil;
 import net.brubio.model.Solicitud;
 import net.brubio.model.Usuario;
@@ -49,6 +58,9 @@ public class SolicitudesController {
 	
 	@Autowired
 	private JavaMailSender javaMailSender;
+	
+	//set para almacenar los ID de las solicitudes ya notificadas
+	//private Set<Integer> solicitudesNotificadas = ConcurrentHashMap.newKeySet();
 	
 	
 	@GetMapping("/indexPaginate")
@@ -164,6 +176,117 @@ public class SolicitudesController {
 	} 
 	
 	
+	@GetMapping("/downloadCv/{archivo}/{id}")
+	public String descargarCv(@PathVariable("archivo") String archivo, @PathVariable("id") Integer id,
+			Authentication autentication, RedirectAttributes attributes) {
+		
+		System.err.println("download cv " + archivo);
+		Solicitud solicitud = serviceSolicitudes.buscarPorId(id);
+		System.err.println(solicitud);
+
+		String username = autentication.getName();
+		Usuario usuario = serviceUsuarios.buscarPorUsername(username);
+
+		System.err.println(usuario);
+
+		boolean esAdministrador = false;
+
+		for (Perfil perfil : usuario.getPerfiles()) {
+			if (perfil.getPerfil().equalsIgnoreCase("ADMINISTRADOR")) {
+				esAdministrador = true;
+				break;
+			}
+		}
+
+		if (esAdministrador) {
+			System.out.println("Es ADMINISTRADOR.");
+			solicitud.setVista(true);
+
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(solicitud.getUsuario().getEmail());
+			message.setSubject("Tu CV fue visto");
+			message.setText("Tu cv fue visualizado por uno de los administradores");
+			javaMailSender.send(message);
+			attributes.addFlashAttribute("msg", "Correo enviado exitosamente.");
+			System.err.println("se envio el correo a " + solicitud.getUsuario().getEmail());
+		} else {
+			System.out.println("NO es ADMINISTRADOR.");
+		}
+
+		// return "redirect:/solicitudes/indexPaginate";
+		return "redirect:/cv/" + archivo;
+	}
+	
+	
+	@GetMapping("/downloadCv_2/{archivo}/{id}")
+	public void descargarCv_2(@PathVariable("archivo") String archivo, @PathVariable("id") Integer id,
+			Authentication autentication, RedirectAttributes attributes, HttpServletResponse response) throws IOException {
+		
+		Solicitud solicitud = serviceSolicitudes.buscarPorId(id);
+        String username = autentication.getName();
+        Usuario usuario = serviceUsuarios.buscarPorUsername(username);
+        
+        boolean esAdministrador = false;
+
+		for (Perfil perfil : usuario.getPerfiles()) {
+			if (perfil.getPerfil().equalsIgnoreCase("ADMINISTRADOR")) {
+				esAdministrador = true;
+				break;
+			}
+		}
+		
+		// Prepara el archivo para la descarga
+        File file = new File("c:/empleos/files-cv/" + archivo); // Ajusta la ruta según tu configuración
+        if (file.exists()) {
+            // Configura la respuesta HTTP para la descarga
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + archivo + "\"");
+            
+            // Stream del archivo al cliente
+            try (InputStream inputStream = new FileInputStream(file);
+                 OutputStream outputStream = response.getOutputStream()) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+            }
+
+            // Solo después de completar el streaming, marca la solicitud como vista y envía el correo
+            solicitud.setVista(true);
+            serviceSolicitudes.guardar(solicitud); // Guardar cambios en la base de datos
+            System.out.println(solicitud.getVista() + " La solicitud ha sido marcada como vista.");
+
+            
+        } else {
+            // Manejo de error si el archivo no existe
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "El archivo no fue encontrado.");
+        }
+		
+		System.err.println(solicitud.getVista());
+		
+		if (esAdministrador) {
+
+            //verificar si el campo vista es false para mandar correo de cv visto
+            if (!solicitud.getVista()) {
+            	// Enviar el correo
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(solicitud.getUsuario().getEmail());
+                message.setSubject("Tu CV fue visto");
+                message.setText("Tu CV fue visualizado por uno de los administradores");
+                javaMailSender.send(message);
+                System.err.println("Se envió el correo a " + solicitud.getUsuario().getEmail());
+            } else {
+                System.out.println("El correo ya fue enviado anteriormente.");
+            }
+        } else {
+            System.out.println("NO es ADMINISTRADOR.");
+        }
+    
+		
+		//return "redirect:/solicitudes/indexPaginate";
+	}
 	
 		
 }
