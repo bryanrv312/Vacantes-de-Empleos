@@ -10,6 +10,7 @@
 	</parent>
 
 	<!-- comentario -->
+	<!-- comentario 2 -->
 	<groupId>net.brubio</groupId>
 	<artifactId>empleos</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
