@@ -1,5 +1,5 @@
 {
   "deploy": {
-    "goal": "-Dtest.active=false -Dexec.mainClass=\"net.brubio.EmpleosApplication\" assembly:jar-with-dependencies exec:java"
+    "goal": "clean package -Dtest.active=false -Dexec.mainClass=\"net.brubio.EmpleosApplication\" assembly:jar-with-dependencies exec:java"
   }
 }
